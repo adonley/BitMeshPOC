@@ -1,0 +1,13 @@
+etherpad-lite (20130716-1) unstable; urgency=low
+
+  * Updated Debian package with a checkout from this evening.
+
+ -- The Doctor <drwho@virtadpt.net>  Sun, 16 Jul 2013 20:55:26 -0400
+
+etherpad-lite (20130414-1) unstable; urgency=low
+
+  * Initial release.
+  * This is a Debian package of today's checkout of the etherpad-lite source
+    code repository.
+
+ -- The Doctor <drwho@virtadpt.net>  Sun, 14 Apr 2013 17:16:26 -0400
