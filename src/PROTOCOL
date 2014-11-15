@@ -1,0 +1,92 @@
+
+OPEN MICROPAYMENT CHANNEL:
+	while ALICE AND BOB HAVE NOT AGREED TO TERMS:
+		ALICE - ANNOUNCE PURCHASE PROPOSAL
+		{
+			"intent"        : "buy",
+			"type"          : "data",
+			"channel_width" : 1024 (bytes),
+			"channel_fund"  : 100000 (satoshi),
+			"refund_delay"  : 1284762476148 (milliseconds),
+			"public_key"    : 1ALICEpbBsflekjfeugiup8u39743e,
+			"signature"	    : eoaifnlsdzkufhozisernziowrlawmeljfpzsirugh
+		}
+
+		BOB - HEAR PROPOSAL, BEGIN NEGOTIATION
+		{
+			"intent"		    : "sell",
+			"type"			    : "data",
+			"channel_width"     : 512 (bytes),
+			"channel_fund"      : 300000 (satoshi),
+			"refund_delay"      : 1114762000300 (milliseconds),
+			"buyer_public_key"  : 1ALICEpbBsflekjfeugiup8u39743e,
+			"seller_public_key" : 1BOBasAbaet3i24ibasuozucnlaskj,
+			"signature"	    	: faskrhaweituabwoefuihadpewiurhaiuyg
+		}
+		...[ALICE AND BOB GO BACK AND FORTH LIKE THIS UNTIL BOB PROPOSES SOMETHING ACCEPTABLE TO ALICE]
+		
+	ALICE - ACCEPT TERMS, BEGIN MICROPAYMENT PROTOCOL WITH AGREED UPON PARAMETERS
+
+NEGOTIATE CONNECTION:
+	ALICE - REQUEST CONNECTION TO HOST
+	{
+		"intent" 	: "connect",
+		"host"		: "encrypted.google.com",
+		"type"      : "domain",
+		"pub_key"	: 1ALICEpbBsflekjfeugiup8u39743e,
+		"signature" : "asdlfnkalwtuhraisraewiroakj95"
+	}
+
+	BOB - DETERMINE PRICE FOR CONNECTION
+	while BOB DOES NOT HAVE ACCESS TO HOST:
+		BOB - (TRANSITIVE) REQUEST CONNECTION TO HOST
+		{
+			"intent" 	: "connect",
+			"host"		: "encrypted.google.com",
+			"type"      : "domain",
+			"pub_key"	: 1BOBasAbaet3i24ibasuozucnlaskj,
+			"signature" : "faaweugoiaueriauyi4uh4oiuy763"
+		}
+
+		...[BOB PLAYS ALICE FOR THE REMAINDER OF THIS LOOP]
+
+	[ BOB NOW HAS ACCESS TO THE HOST FOR SOME PRICE ]
+
+	while ALICE DOES NOT ACCEPT TERMS:
+		BOB - OFFER
+		{
+			"intent" 					: "connect",
+			"host"						: "encrypted.google.com",
+			"type"     					: "domain",
+			"price_per_channel_width"	: 150 (satoshi)
+			"pub_key"					: 1BOBasAbaet3i24ibasuozucnlaskj,
+			"signature" 				: "iugfahsfihbziuygefkjhzfieygyu"
+		}
+
+		ALICE - COUNTEROFFER
+		{
+			"intent" 					: "connect",
+			"host"						: "encrypted.google.com",
+			"type"     					: "domain",
+			"price_per_channel_width"	: 100 (satoshi)
+			"pub_key"					: 1ALICEpbBsflekjfeugiup8u39743e,
+			"signature" 				: "4587468361dfufueufaacuehba"
+		}
+
+	[ ALICE AND BOB HAVE NOW AGREED ON PRICE FOR CONNECTION ]
+
+	while ALICE WANTS MORE DATA:
+
+		BOB - PROVIDE [channel_width] OF DATA
+		ALICE - UPDATE MICROPAYMENT TRANSACTION (PAY BOB)
+
+
+
+	
+
+
+
+
+
+
+
