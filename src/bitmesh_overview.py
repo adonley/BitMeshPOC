@@ -10,6 +10,17 @@ class Price:
 	def __init__(self, arg=None):
 		pass
 
+# channel_width determines how many bytes pass thru before Alice pays
+# should be a multiple of MTU? change units to packets?
+channel_width = 1024
+
+# how long in seconds to delay refund tx for
+refund_delay = 1000000000
+
+# amount of satoshi to lock up in escrow
+channel_fund = 100000
+
+
 def get_bitmesh_peers():
 	pass
 
@@ -23,7 +34,7 @@ def open_micropayment_channel_with_peer(peer):
 	refund_tx = create_refund_transaction(our_pub_key, peer_pub_key)
 	# like a tab at a bar
 	tab_tx    = create_tab_transaction(our_pub_key, peer_pub_key)
-	refund_tx, tab_tx = send_refund_and_tab_for_signatures(refund_tx, tab_tx)
+	refund_tx, tab_tx = send_refund_for_signature(refund_tx)
 	broadcast_escrow_tx(escrow_tx)
 
 def request_pub_key_from_peer(peer):
@@ -42,11 +53,14 @@ def create_refund_transaction(our_pub_key, peer_pub_key):
 def create_tab_transaction(our_pub_key, peer_pub_key):
 	pass
 
-def send_refund_and_tab_for_signatures(refund_tx, tab_tx):
+def send_refund_for_signature(refund_tx):
 	pass
 
 def data_merchant_loop:
 	while tab_not_exhausted() and service_is_available():	
 		request = receive_request
 		get_prices_from_peers(bitmesh_peers, request)
+
+def get_prices_from_peers(peers, request):
+	pass
 
