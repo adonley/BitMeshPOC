@@ -1,3 +1,41 @@
+STATE MACHINE:
+
+SERVICE_REQUESTER ALICE
+SERVICE_PROVIDER BOB
+
+BOB:
+
+LOAD_CONFIGURATION ==> CONNECT_TO_NETWORK ==> WAIT_FOR_REQUEST ==> RECEIVE_SERVICE_REQUEST ==> NEGOTIATE_CHANNEL_CONFIGURATION ==> NEGOTIATE_PRICE ==> PROVIDE_SERVICE ==> WAIT_FOR_REQUEST ...
+
+ALICE:
+
+LOAD_CONFIGURATION ==> CONNECT_TO_NETWORK ==> MAKE_REQUEST ==> NEGOTIATE_CHANNEL_CONFIGURATION ==> NEGOTIATE_PRICE ==> RECEIVE_SERVICE
+
+
+NOTES:
+	LOAD_CONFIGURATION:
+		Here Alice and Bob may load their preferences and constraints for the micropayment channel and the price. Such preferences and constraints would constitute a negotiation algorithm. We intentionally abstract this out so that any algorithm could be used if it conforms to this protocol.
+
+	CONNECT_TO_NETWORK:
+		Here Alice and Bob connect to the network via whatever protocol they choose to use. We intentionally abstract this out so that a variety of network protocols may be used. We imagine the communication happening via a meshing protocol, or standard wifi or tor or bluetooth or whatever works. This state (may) include broadcast and discovery of services. 
+
+	NEGOTIATE_*:
+		Negotiation is modelled as a loop that terminates on any of the following conditions:
+			- Either party times out, indicating loss of interest in service
+			- Either party repeats themselves more than twice, indicating unwillingness to change the terms further 
+			- Either party repeats the other's message, indicating agreement. 
+
+		Communication occurs via JSON messages that are passed back and forth over whatever communication protocol is being used. JSON messages take the form: ?
+
+	*_SERVICE:
+		Services and payment are provided incrementally to minimize loss due to fraud. This is currently done via micropayment channels, but we are abstracting it to avoid committing the future to too much.
+
+
+
+
+
+EXAMPLE:
+
 
 OPEN MICROPAYMENT CHANNEL:
 	while ALICE AND BOB HAVE NOT AGREED TO TERMS:
@@ -7,7 +45,7 @@ OPEN MICROPAYMENT CHANNEL:
 			"type"          : "data",
 			"channel_width" : 1024 (bytes),
 			"channel_fund"  : 100000 (satoshi),
-			"refund_delay"  : 1284762476148 (milliseconds),
+			"refund_delay"  : 12847 (epoch time in seconds or block_height),
 			"public_key"    : 1ALICEpbBsflekjfeugiup8u39743e,
 			"signature"	    : eoaifnlsdzkufhozisernziowrlawmeljfpzsirugh
 		}
@@ -18,7 +56,7 @@ OPEN MICROPAYMENT CHANNEL:
 			"type"			    : "data",
 			"channel_width"     : 512 (bytes),
 			"channel_fund"      : 300000 (satoshi),
-			"refund_delay"      : 1114762000300 (milliseconds),
+			"refund_delay"      : 11147 (epoch time in seconds or block_height),
 			"buyer_public_key"  : 1ALICEpbBsflekjfeugiup8u39743e,
 			"seller_public_key" : 1BOBasAbaet3i24ibasuozucnlaskj,
 			"signature"	    	: faskrhaweituabwoefuihadpewiurhaiuyg
@@ -82,7 +120,10 @@ NEGOTIATE CONNECTION:
 
 
 
-	
+
+
+
+
 
 
 

@@ -12,8 +12,6 @@ class Price:
 		pass
 
 
-
-
 # channel_width determines how many bytes pass thru before Alice pays
 # should be a multiple of MTU? change units to packets?
 channel_width = 1024
@@ -64,7 +62,6 @@ def request_pub_key_from_peer(peer):
 	msg = socket.recv()
 	print msg
 	#socket.connect("tcp://localhost:%s" % port)
-
 
 def send_pub_key_to_peer():
 	socket.bind("tcp://*:%s" % port)
@@ -135,13 +132,11 @@ def create_refund_transaction(*args):
 
     return serialize(txobj)
 
-
 def create_tab_transaction(our_pub_key, peer_pub_key):
 	pass
 
 def send_refund_for_signature(refund_tx):
 	pass
-
 
 def data_merchant_loop():
 	while tab_not_exhausted() and service_is_available():
