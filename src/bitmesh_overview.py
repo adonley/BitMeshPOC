@@ -1,5 +1,6 @@
 from bitcoin.main import *
 import zmq
+import bitcoind_server_interface
 
 class Peer:
 	
@@ -34,6 +35,7 @@ context = zmq.Context()
 # socket to communicate thru
 socket = context.socket(zmq.PAIR)
 
+def write_keys_to_file(priv_key,pub_key)
 
 def get_bitmesh_peers():
 	pass	
