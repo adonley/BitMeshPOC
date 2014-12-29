@@ -308,6 +308,7 @@ def seller_handle_escrow_tx():
 		# broadcast it
 		broadcast_tx(escrow_tx)
 	else:
+		print 'escrow_tx was not valid', escrow_tx
 		# TODO 
 
 	socket.send('escrow tx was %s' % valid)
