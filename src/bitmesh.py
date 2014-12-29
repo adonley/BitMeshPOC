@@ -1,5 +1,6 @@
 from bitcoin.main import *
 import zmq
+import requests
 
 class Peer:
 	
@@ -40,6 +41,9 @@ seller_multisig_priv_key = ''
 # private key buyer uses to sign multisig output
 buyer_multisig_priv_key = ''
 
+# private key buyer uses to spend pre-existing funds
+buyer_unspent_priv_key = ''
+
 # complete refund tx signed and ready to broadcast
 complete_refund_tx = {}
 
@@ -62,7 +66,7 @@ def data_merchant_loop():
 
 def get_unspent_outputs(min):
 	# return outputs, total_in 
-	# TODO
+	# TODO hardwire it?
 	pass
 
 def buyer_open_micropayment_channel_with_peer(peer):
@@ -72,7 +76,9 @@ def buyer_open_micropayment_channel_with_peer(peer):
 	seller_multisig_pub_key    = request_pub_key_from_peer(peer)
 
 	# create the escrow tx with multisig output
-	escrow_tx =	create_escrow_transaction(buyer_multisig_pub_key, seller_multisig_pub_key)
+	escrow_tx =	create_escrow_transaction(buyer_multisig_pub_key, \
+										  buyer_unspent_priv_key, \
+										  seller_multisig_pub_key)
 	
 	# create the refund tx in case seller disappears
 	refund_tx = create_refund_transaction(escrow_tx['outputs'][0])
@@ -89,7 +95,14 @@ def buyer_open_micropayment_channel_with_peer(peer):
 	# create a tab tx that sends seller bitcoin for services
 	tab_tx = create_tab_transaction(escrow_tx['outputs'][0], peer_pub_key)
 
+	return tab_tx
+
+
 	# TODO: get data, update tab transaction
+	while True:
+		domain = raw_input('What website do you want')
+
+
 
 # updates tab transaction by delta and re-signs the transaction, returns the signature
 def buyer_update_tab_transaction(tab_tx, delta):
@@ -109,7 +122,7 @@ def buyer_update_tab_transaction(tab_tx, delta):
 
 # create escrow transaction
 # multisigs are applied in the following order: [0] buyer [1] seller
-def create_escrow_transaction(buyer_pub_key, seller_pub_key):
+def create_escrow_transaction(buyer_pub_key, buyer_priv_key, seller_pub_key):
 	inputs, total_in = get_unspent_outputs(channel_fund + tx_fee)
 
 	# make a multisig output
@@ -129,9 +142,9 @@ def create_escrow_transaction(buyer_pub_key, seller_pub_key):
 	escrow_tx = bitcoin.mktx(inputs, multisig_output, change_output)
 
 	# sign inputs
-	# TODO
+	# assumes there is one input and it's private key is buyer_priv_key
+	return bitcoin.sign(escrow_tx, 0, buyer_priv_key)
 
-	return escrow_tx
 
 # create a refund transaction with the escrow's multisig output as input
 def create_refund_transaction(multisig_input):
@@ -272,7 +285,7 @@ def seller_handle_refund_tx():
 
 	# wait for the refund_tx from the buyer
 	refund_tx = socket.recv()
-	print 'received refund tx'
+	print 'received refund tx', refund_tx
 
 	# validate refund tx (check that input is multisig with our key)
 	# TODO
@@ -299,6 +312,17 @@ def seller_handle_escrow_tx():
 
 	socket.send('escrow tx was %s' % valid)
 
+def seller_handle_domain_request():
+
+	# get the requested domain from the buyer
+	domain = socket.recv()
+
+	# TODO: validate the domain is a good one
+	html = requests.get(domain).text
+
+	socket.send(html)
+
+
 def listen_for_buyers():
 	socket.bind('tcp://*:%s' % port)
 	while True:
@@ -317,6 +341,7 @@ def parse_message(peer_message):
 		send_pub_key_to_peer()
 		seller_handle_refund_tx()
 		seller_handle_escrow_tx()
+		seller_handle_domain_request()
 	# TODO
 
 def send_pub_key_to_peer():
@@ -327,10 +352,10 @@ def send_pub_key_to_peer():
 	print 'sent', pub, 'waiting for refund tx'
 
 
+
 #############################
 # BITCOIN NETWORK FUNCTIONS #
 #############################
 
-def broadcast_tx():
-	# TODO
-	pass
+def broadcast_tx(tx):
+	bitcoin.blockr_pushtx(tx, network='testnet')
