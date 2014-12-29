@@ -1,3 +1,6 @@
+# to start buyer, call buy_data(ip_address)
+# to start seller, call listen_for_buyers()
+
 from bitcoin.main import *
 import zmq
 import requests
