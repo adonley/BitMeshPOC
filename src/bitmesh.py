@@ -321,7 +321,7 @@ def seller_handle_domain_request():
 	# TODO: validate the domain is a good one
 	html = requests.get(domain).text
 
-	socket.send(html)
+	socket.send_string(html)
 
 
 def listen_for_buyers():
