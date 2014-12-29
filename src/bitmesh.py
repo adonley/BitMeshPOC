@@ -98,13 +98,9 @@ def buyer_open_micropayment_channel_with_peer(peer):
 	return tab_tx
 
 
-	# TODO: get data, update tab transaction
-	while True:
-		domain = raw_input('What website do you want')
 
-
-
-# updates tab transaction by delta and re-signs the transaction, returns the signature
+# updates tab transaction by delta and re-signs the transaction
+# returns the signature and the updated tab_tx
 def buyer_update_tab_transaction(tab_tx, delta):
 	refund_output   = tab_tx['outputs'][0]
 	purchase_output = tab_tx['outputs'][1]
@@ -118,7 +114,8 @@ def buyer_update_tab_transaction(tab_tx, delta):
 
 	buyer_signature = bitcoin.multisign(tab_tx, 0, tab_tx['inputs'][0]['script'], \
 								buyer_multisig_priv_key)
-	return buyer_signature
+
+	return buyer_signature, tab_tx
 
 # create escrow transaction
 # multisigs are applied in the following order: [0] buyer [1] seller
@@ -323,6 +320,33 @@ def seller_handle_domain_request():
 
 	socket.send_string(html)
 
+def seller_handle_updated_transaction():
+
+	updated_sig = socket.recv()
+	updated_tx  = socket.recv()
+
+	# TODO: verify sig and tx
+	print 'updated_sig', updated_sig
+	print 'updated_tx',  updated_tx
+
+	return updated_tx
+
+
+def buyer_send_domain_request(domain):
+	socket.send_string(domain)
+	return socket.recv()
+
+def buy_data(peer):
+	tab_tx = buyer_open_micropayment_channel_with_peer(peer)
+
+	# TODO: get data, update tab transaction
+	while True:
+		domain = raw_input('Request URL:')
+		print buyer_send_domain_request(domain)
+		updated_sig, tab_tx = buyer_update_tab_transaction(tab_tx, 100)
+		socket.send_string(updated_sig)
+		socket.send_string(tab_tx)
+
 
 def listen_for_buyers():
 	socket.bind('tcp://*:%s' % port)
@@ -342,8 +366,11 @@ def parse_message(peer_message):
 		send_pub_key_to_peer()
 		seller_handle_refund_tx()
 		seller_handle_escrow_tx()
-		seller_handle_domain_request()
-	# TODO
+		while not socket.closed():
+			seller_handle_domain_request()
+			tab_tx = seller_handle_updated_transaction()
+
+		broadcast_tx(tab_tx)
 
 def send_pub_key_to_peer():
 
