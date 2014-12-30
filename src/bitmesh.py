@@ -47,6 +47,8 @@ buyer_multisig_priv_key = ''
 # private key buyer uses to spend pre-existing funds
 # hardcoded for now
 buyer_unspent_priv_key = '976895009f5c494a7d7969845ade3c570562fbe79b8e91ce20dc5ef502fd59eb'
+
+# bitcoin.privtoaddr(buyer_unspent_priv_key, 111)
 buyer_unspent_testnet_addr = 'mj8psFsuu2PjfHFaiRUsuhnqJHoRsCPfwX'
 
 # complete refund tx signed and ready to broadcast
