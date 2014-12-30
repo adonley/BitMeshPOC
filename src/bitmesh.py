@@ -45,7 +45,9 @@ seller_multisig_priv_key = ''
 buyer_multisig_priv_key = ''
 
 # private key buyer uses to spend pre-existing funds
-buyer_unspent_priv_key = ''
+# hardcoded for now
+buyer_unspent_priv_key = '976895009f5c494a7d7969845ade3c570562fbe79b8e91ce20dc5ef502fd59eb'
+buyer_unspent_testnet_addr = 'mj8psFsuu2PjfHFaiRUsuhnqJHoRsCPfwX'
 
 # complete refund tx signed and ready to broadcast
 complete_refund_tx = {}
@@ -70,7 +72,9 @@ def data_merchant_loop():
 def get_unspent_outputs(min):
 	# return outputs, total_in 
 	# TODO hardwire it?
-	pass
+	#bitcoin.blockr_unspent(buyer_unspent_testnet_addr, 'testnet')
+	return [{'output': u'eff37fa275802249315ffdf6dd71f2219bf130a9914403b4431d74491ce302b1:1', 'value': 100000}], 100000
+	
 
 def buyer_open_micropayment_channel_with_peer(peer):
 	global buyer_multisig_priv_key
@@ -276,9 +280,10 @@ def get_prices_from_peers(peers, request):
 
 def request_pub_key_from_peer(peer):
 	socket.connect('tcp://%s:%s' % (peer, port))
-	socket.send('gimme dat pub key!!11')
+	socket.send('requesting pub key')
 	msg = socket.recv()
-	print msg
+	print 'received pub key', msg
+	return msg
 	#socket.connect("tcp://localhost:%s" % port)
 
 def seller_handle_refund_tx():
