@@ -5,16 +5,6 @@ from bitcoin.main import *
 import zmq
 import requests
 
-class Peer:
-	
-    def __init__(self, arg=None):
-    	pass
-
-class Price:
-
-	def __init__(self, arg=None):
-		pass
-
 
 # channel_width determines how many bytes pass thru before Alice pays
 # should be a multiple of MTU? change units to packets?
@@ -48,7 +38,8 @@ buyer_multisig_priv_key = ''
 # hardcoded for now
 buyer_unspent_priv_key = '976895009f5c494a7d7969845ade3c570562fbe79b8e91ce20dc5ef502fd59eb'
 
-# bitcoin.privtoaddr(buyer_unspent_priv_key, 111)
+
+#buyer_unspent_testnet_addr = bitcoin.main.privkeytoaddr(buyer_unspent_priv_key, 111)
 buyer_unspent_testnet_addr = 'mj8psFsuu2PjfHFaiRUsuhnqJHoRsCPfwX'
 
 # complete refund tx signed and ready to broadcast
