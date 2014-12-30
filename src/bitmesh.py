@@ -248,7 +248,8 @@ def buyer_sign_refund(refund_tx, seller_signature):
 									buyer_signature, seller_signature)
 
 def seller_validate_escrow_tx(escrow_tx):
-	pass
+	#TODO: actually do this
+	return True
 
 ################################
 # PEER COMMUNICATION FUNCTIONS #
@@ -349,7 +350,6 @@ def buyer_send_domain_request(domain):
 def buy_data(peer):
 	tab_tx = buyer_open_micropayment_channel_with_peer(peer)
 
-	# TODO: get data, update tab transaction
 	while True:
 		domain = raw_input('Request URL:')
 		print buyer_send_domain_request(domain)
