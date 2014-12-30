@@ -138,7 +138,9 @@ def create_escrow_transaction(buyer_pub_key, buyer_priv_key, seller_pub_key):
 	multisig_output['value']  = channel_fund
 
 	# make a change address for the difference between inputs and outputs
-	change_pub_key, _ 		 = get_new_pub_priv_key()
+	change_pub_key, change_priv_key = get_new_pub_priv_key()
+	print 'change_pub_key:', change_pub_key
+	print 'change_priv_key:', change_priv_key
 	change_addr       		 = pubkey_to_address(change_pub_key)
 	change_output			 = {}
 	change_output['address'] = change_addr
