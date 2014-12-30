@@ -121,7 +121,7 @@ def buyer_update_tab_transaction(tab_tx, delta):
 
 	buyer_signature = bitcoin.multisign(tab_tx, 0, tab_tx['inputs'][0]['script'], \
 								buyer_multisig_priv_key)
-
+	print 'updating tx', tab_tx
 	return buyer_signature, tab_tx
 
 # create escrow transaction
@@ -280,7 +280,9 @@ def get_prices_from_peers(peers, request):
 
 def request_pub_key_from_peer(peer):
 	socket.connect('tcp://%s:%s' % (peer, port))
-	socket.send('requesting pub key')
+	message = {}
+	message['intent'] = 'buy'
+	socket.send(message)
 	msg = socket.recv()
 	print 'received pub key', msg
 	return msg
