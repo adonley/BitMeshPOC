@@ -32,6 +32,8 @@ class ClientWindow(Frame):
 		# establish text area with border of 1 that is "Sunken"
 		self.text_area = Text(self, bd=1, relief=SUNKEN)
 		self.text_area.insert(END,"BEGIN LOG\n---------")
+		# Texts have to be in state normal to be modified. I am doing this
+		# so the user doesn't edit the log
 		self.text_area.config(state=DISABLED)
 		self.text_area.grid(row=0, column=0, columnspan=2, rowspan=4, sticky=E+W+S+N)
 		
@@ -56,8 +58,8 @@ class ClientWindow(Frame):
 	def connect_callback(self,event):
 		self.text_area.config(state=NORMAL)
 		self.text_area.insert(END,"\nConnecting to: "+"IP/"+":"+"PORT")
-
 		self.text_area.config(state=DISABLED)
+		# bitmesh.buy_data
 
 	# centers the window in the client's screen
 	def centerWindow(self):  
