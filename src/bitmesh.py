@@ -278,7 +278,7 @@ def request_pub_key_from_peer(peer):
 	socket.connect('tcp://%s:%s' % (peer, port))
 	message = {}
 	message['intent'] = 'buy'
-	socket.send(message)
+	socket.send_string(str(message))
 	msg = socket.recv()
 	print 'received pub key', msg
 	return msg
@@ -357,7 +357,7 @@ def listen_for_buyers():
 	socket.bind('tcp://*:%s' % port)
 	while True:
 		# listen for messages
-		message = socket.recv()
+		message = dict(socket.recv())
 		print 'received message', message	
 		parse_message(message)
 
