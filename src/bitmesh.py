@@ -117,7 +117,7 @@ def buyer_open_micropayment_channel_with_peer(peer):
 	send_escrow_tx_to_seller(escrow_tx)
 
 	# create a tab tx that sends seller bitcoin for services
-	tab_tx = create_tab_transaction(escrow_tx['outs'][0], peer_pub_key)
+	tab_tx = create_tab_transaction(escrow_tx, seller_multisig_pub_key)
 
 	return tab_tx
 
@@ -237,7 +237,7 @@ def build_refund_transaction(*args):
 
     return txobj
 
-def create_tab_transaction(multisig_input, seller_pub_key):
+def create_tab_transaction(escrow_tx, seller_pub_key):
 
 	# make a refund output with the entire input
 	refund_pub_key, _ 		   = get_new_pub_priv_key()
@@ -253,6 +253,13 @@ def create_tab_transaction(multisig_input, seller_pub_key):
 	purchase_output['address'] = seller_pub_key
 	purchase_output['value']   = 0
 	
+	# hook the multisig output up as an input
+	multisig_input = escrow_tx['outs'][0]	
+	multisig_input['outpoint'] = {}
+	multisig_input['outpoint']['index'] = 0
+	multisig_input['outpoint']['hash'] = txhash(serialize(escrow_tx))
+	multisig_input['sequence'] = 0
+
 	# make the tab tx
 	return mktx(multisig_input, refund_output, purchase_output)
 
@@ -267,18 +274,13 @@ def seller_sign_refund(refund_tx):
 	
 def buyer_sign_refund(refund_tx, seller_signature):
 	# get buyer's signature on refund
-<<<<<<< HEAD
 	serialized_refund_tx = serialize(refund_tx)
-	buyer_signature = multisign(serialized_refund_tx, 0, refund_tx['inputs'][0]['script'], \
-=======
-
-	buyer_signature = multisign(refund_tx, 0, refund_tx['ins'][0]['script'], \
->>>>>>> 8455cde95fe0ac9eb6b7ff08c8930fb9cfc7c393
+	buyer_signature = multisign(serialized_refund_tx, 0, refund_tx['ins'][0]['script'], \
 										buyer_multisig_priv_key)
 	
 
 	# apply signatures and return completed tx 
-	return apply_multisignatures(refund_tx, 0, refund_tx['ins'][0]['script'], \
+	return apply_multisignatures(serialized_refund_tx, 0, refund_tx['ins'][0]['script'], \
 									buyer_signature, seller_signature)
 
 def seller_validate_escrow_tx(escrow_tx):
@@ -302,7 +304,7 @@ def send_refund_for_signature(peer, refund_tx):
 	return signature
 
 def send_escrow_tx_to_seller(escrow_tx):
-	socket.send(escrow_tx)
+	socket.send_json(escrow_tx)
 
 def get_bitmesh_peers():
 	# TODO
@@ -342,7 +344,7 @@ def seller_handle_refund_tx():
 def seller_handle_escrow_tx():
 
 	# wait for the escrow_tx from the buyer to prove money is on the table
-	escrow_tx = socket.recv()
+	escrow_tx = dict(socket.recv_json())
 
 	# validate escrow tx (check input signatures, multisig output)
 	valid = seller_validate_escrow_tx(escrow_tx)
@@ -414,7 +416,7 @@ def parse_message(peer_message):
 		send_pub_key_to_peer()
 		seller_handle_refund_tx()
 		seller_handle_escrow_tx()
-		while not socket.closed():
+		while not socket.closed:
 			seller_handle_domain_request()
 			tab_tx = seller_handle_updated_transaction()
 
