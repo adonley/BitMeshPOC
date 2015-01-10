@@ -57,7 +57,7 @@ class ClientWindow(Frame):
 		self.log_text_area.config(state=DISABLED)
 		print 'BUTTON CLICKED YO'
 		try:
-			bitmesh.buy_data("172.16.11.104")
+			bitmesh.buy_data("192.168.43.73")
 		except:
 			print "There was an issue."
 			traceback.print_exc()
