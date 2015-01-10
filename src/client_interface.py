@@ -37,7 +37,7 @@ class ClientWindow(Frame):
 		self.log_text_area.config(state=DISABLED)
 		self.log_text_area.grid(row=1, column=0, columnspan=2, rowspan=4, sticky=E+W+S+N)
 		
-		self.connect_button = Button(self, text="Connect")
+		self.connect_button = Button(self, text="Connect to Server")
 		# TODO: attempting to strech the button across the grid
 		self.connect_button.grid(row=1, column=2, sticky=E+W+N)
 		self.connect_button.bind("<Button-1>", self.connect_callback)
@@ -54,7 +54,7 @@ class ClientWindow(Frame):
 		self.log_text_area.config(state=NORMAL)
 		self.log_text_area.insert(END,"\nConnecting to: "+"IP/"+":"+"PORT")
 		self.log_text_area.config(state=DISABLED)
-		# bitmesh.buy_data
+		bitmesh.buy_data("192.168.43.73")
 
 	def request_callback(self,event):
 		self.log_text_area.config(state=NORMAL)
