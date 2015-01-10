@@ -1,6 +1,7 @@
 from Tkinter import *
 from ttk import Style
 import bitmesh
+import traceback
 
 class ClientWindow(Frame):
 
@@ -54,7 +55,13 @@ class ClientWindow(Frame):
 		self.log_text_area.config(state=NORMAL)
 		self.log_text_area.insert(END,"\nConnecting to: "+"IP/"+":"+"PORT")
 		self.log_text_area.config(state=DISABLED)
-		bitmesh.buy_data("192.168.43.73")
+		print 'BUTTON CLICKED YO'
+		try:
+			bitmesh.buy_data("172.16.11.104")
+		except:
+			print "There was an issue."
+			traceback.print_exc()
+			self.parent.quit()
 
 	def request_callback(self,event):
 		self.log_text_area.config(state=NORMAL)

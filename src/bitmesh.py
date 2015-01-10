@@ -20,12 +20,10 @@
 # send_escrow_tx_to_seller()
 # create_tab_transaction()
 
-
 from bitcoin.main import *
 from bitcoin.transaction import *
 import zmq
 import requests
-
 
 # channel_width determines how many bytes pass thru before Alice pays
 # should be a multiple of MTU? change units to packets?
@@ -96,20 +94,25 @@ def buyer_open_micropayment_channel_with_peer(peer):
 	buyer_multisig_pub_key, buyer_multisig_priv_key  = get_new_pub_priv_key()
 	seller_multisig_pub_key    = request_pub_key_from_peer(peer)
 
+	print "Got multisig pub key from peer. ", peer
+
 	# create the escrow tx with multisig output
 	escrow_tx =	create_escrow_transaction(buyer_multisig_pub_key, \
 										  buyer_unspent_priv_key, \
 										  seller_multisig_pub_key)
 	
+	print escrow_tx
 	# create the refund tx in case seller disappears
 	refund_tx = create_refund_transaction(escrow_tx)
 	
+	print "HELLO REFUND" , refund_tx
 	# send the refund, get it signed, check the signature
 	seller_refund_signature = send_refund_for_signature(peer, refund_tx)
 
 	# apply signatures to refund tx
 	complete_refund_tx = buyer_sign_refund(refund_tx, seller_refund_signature)
 
+	print "I am a complete refund", complete_refund_tx
 	# send the escrow to seller, proving we have money on the table
 	send_escrow_tx_to_seller(escrow_tx)
 
@@ -164,7 +167,6 @@ def create_escrow_transaction(buyer_pub_key, buyer_priv_key, seller_pub_key):
 	# assumes there is one input and it's private key is buyer_priv_key
 	return dict(deserialize(sign(escrow_tx, 0, buyer_priv_key)))
 
-
 # create a refund transaction with the escrow's multisig output as input
 def create_refund_transaction(escrow_tx):
 	buyer_refund_pub_key, _  = get_new_pub_priv_key()
@@ -175,11 +177,14 @@ def create_refund_transaction(escrow_tx):
 	refund_output['address'] = buyer_refund_addr
 	refund_output['value']	 = channel_fund - tx_fee
 
+
 	multisig_input = escrow_tx['outs'][0]	
 	multisig_input['outpoint'] = {}
 	multisig_input['outpoint']['index'] = 0
 	multisig_input['outpoint']['hash'] = txhash(serialize(escrow_tx))
 	multisig_input['sequence'] = 0
+
+	print "I AM A GOOSE", multisig_input, "\nI AM ANOTHER GOOSE", refund_output
 
 	return build_refund_transaction([multisig_input], [refund_output])
 
@@ -262,13 +267,18 @@ def seller_sign_refund(refund_tx):
 	
 def buyer_sign_refund(refund_tx, seller_signature):
 	# get buyer's signature on refund
+<<<<<<< HEAD
 	serialized_refund_tx = serialize(refund_tx)
 	buyer_signature = multisign(serialized_refund_tx, 0, refund_tx['inputs'][0]['script'], \
+=======
+
+	buyer_signature = multisign(refund_tx, 0, refund_tx['ins'][0]['script'], \
+>>>>>>> 8455cde95fe0ac9eb6b7ff08c8930fb9cfc7c393
 										buyer_multisig_priv_key)
 	
 
 	# apply signatures and return completed tx 
-	return apply_multisignatures(refund_tx, 0, refund_tx['inputs'][0]['script'], \
+	return apply_multisignatures(refund_tx, 0, refund_tx['ins'][0]['script'], \
 									buyer_signature, seller_signature)
 
 def seller_validate_escrow_tx(escrow_tx):
@@ -283,12 +293,11 @@ def send_refund_for_signature(peer, refund_tx):
 	socket.send_json(refund_tx)
 	print 'sent refund_tx for signature'
 
+	# seller sends from seller_handle_refund_transaction
 	signature = socket.recv_string()
-	print 'received signature'
+	print 'received signature' , signature
 	
 	#TODO: check signature
-
-	
 
 	return signature
 
@@ -307,7 +316,8 @@ def request_pub_key_from_peer(peer):
 	socket.connect('tcp://%s:%s' % (peer, port))
 	message = {}
 	message['intent'] = 'buy'
-	socket.send_string(str(message))
+	socket.send_json(message)
+	print 'Sent my good lord a message' , str(message)
 	msg = socket.recv()
 	print 'received pub key', msg
 	return msg
@@ -424,5 +434,7 @@ def send_pub_key_to_peer():
 #############################
 
 def broadcast_tx(tx):
-	pass
 	#blockr_pushtx(tx, network='testnet')
+	print "broadcast_tx, pass so we don't spend our good money on nonsense"
+	pass
+
