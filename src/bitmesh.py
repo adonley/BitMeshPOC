@@ -119,7 +119,6 @@ def buyer_open_micropayment_channel_with_peer(peer):
 	return tab_tx
 
 
-
 # updates tab transaction by delta and re-signs the transaction
 # returns the signature and the updated tab_tx
 def buyer_update_tab_transaction(tab_tx, delta):
@@ -180,6 +179,7 @@ def create_refund_transaction(escrow_tx):
 	multisig_input['outpoint'] = {}
 	multisig_input['outpoint']['index'] = 0
 	multisig_input['outpoint']['hash'] = txhash(serialize(escrow_tx))
+	multisig_input['sequence'] = 0
 
 	return build_refund_transaction([multisig_input], [refund_output])
 
@@ -254,13 +254,16 @@ def create_tab_transaction(multisig_input, seller_pub_key):
 
 # seller signs refund, returns signature
 def seller_sign_refund(refund_tx):
-	signature = multisign(refund_tx, 0, refund_tx['ins'][0]['script'], \
+	# because serialization
+	serialized_refund_tx = serialize(refund_tx)
+	signature = multisign(serialized_refund_tx, 0, refund_tx['ins'][0]['script'], \
 						seller_multisig_priv_key)
 	return signature
 	
 def buyer_sign_refund(refund_tx, seller_signature):
 	# get buyer's signature on refund
-	buyer_signature = multisign(refund_tx, 0, refund_tx['inputs'][0]['script'], \
+	serialized_refund_tx = serialize(refund_tx)
+	buyer_signature = multisign(serialized_refund_tx, 0, refund_tx['inputs'][0]['script'], \
 										buyer_multisig_priv_key)
 	
 
@@ -314,7 +317,7 @@ def seller_handle_refund_tx():
 
 	# wait for the refund_tx from the buyer
 	# buyer sends from send_refund_for_signature
-	refund_tx = socket.recv_json()
+	refund_tx = dict(socket.recv_json())
 	print 'received refund tx', refund_tx
 
 	# validate refund tx (check that input is multisig with our key)
