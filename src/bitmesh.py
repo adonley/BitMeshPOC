@@ -395,6 +395,14 @@ def buy_data(peer):
 	while True:
 		domain = raw_input('Request URL:')
 		site = buyer_send_domain_request(domain)
+		print site
+
+		with open("site.html","w") as f:
+			f.write(site)
+		f.closed()
+
+
+
 		updated_sig, tab_tx = buyer_update_tab_transaction(tab_tx, 100)
 		socket.send_string(updated_sig)
 		socket.send_json(tab_tx)
