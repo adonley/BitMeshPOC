@@ -135,7 +135,8 @@ def buyer_update_tab_transaction(tab_tx, delta):
 	refund_output['value']   = refund_output['value']   - delta
 	purchase_output['value'] = purchase_output['value'] + delta
 
-	buyer_signature = multisign(tab_tx, 0, tab_tx['inputs'][0]['script'], \
+	serialized_tab_tx = serialize(tab_tx)
+	buyer_signature = multisign(serialized_tab_tx, 0, tab_tx['ins'][0]['script'], \
 								buyer_multisig_priv_key)
 	print 'updating tx', tab_tx
 	return buyer_signature, tab_tx
@@ -250,7 +251,7 @@ def create_tab_transaction(escrow_tx, seller_pub_key):
 	# make a purchase output that goes to the seller
 	# this gets incrementally increased as more data is delivered
 	purchase_output            = {}
-	purchase_output['address'] = seller_pub_key
+	purchase_output['address'] = pubtoaddr(seller_pub_key)
 	purchase_output['value']   = 0
 	
 	# hook the multisig output up as an input
@@ -365,7 +366,7 @@ def seller_handle_domain_request():
 
 	# TODO: validate the domain is a good one
 	html = requests.get(domain).text
-
+	print html
 	socket.send_string(html)
 
 def seller_handle_updated_transaction():
@@ -399,10 +400,14 @@ def buy_data(peer):
 def listen_for_buyers():
 	socket.bind('tcp://*:%s' % port)
 	while True:
-		# listen for messages
-		message = socket.recv_json()
-		print 'received message', message	
-		parse_message(message)
+		try:
+
+			# listen for messages
+			message = socket.recv_json()
+			print 'received message', message	
+			parse_message(message)
+		except Exception as e:
+			pass
 
 
 def parse_message(peer_message):
