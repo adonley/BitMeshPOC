@@ -94,31 +94,32 @@ def buyer_open_micropayment_channel_with_peer(peer):
 	buyer_multisig_pub_key, buyer_multisig_priv_key  = get_new_pub_priv_key()
 	seller_multisig_pub_key    = request_pub_key_from_peer(peer)
 
-	print "Got multisig pub key from peer. ", peer
+#	print "Got multisig pub key from peer. ", peer
 
 	# create the escrow tx with multisig output
 	escrow_tx =	create_escrow_transaction(buyer_multisig_pub_key, \
 										  buyer_unspent_priv_key, \
 										  seller_multisig_pub_key)
 	
-	print escrow_tx
+#	print escrow_tx
 	# create the refund tx in case seller disappears
 	refund_tx = create_refund_transaction(escrow_tx)
 	
-	print "HELLO REFUND" , refund_tx
+#	print "HELLO REFUND" , refund_tx
 	# send the refund, get it signed, check the signature
 	seller_refund_signature = send_refund_for_signature(peer, refund_tx)
 
 	# apply signatures to refund tx
 	complete_refund_tx = buyer_sign_refund(refund_tx, seller_refund_signature)
 
-	print "I am a complete refund", complete_refund_tx
+#	print "I am a complete refund", complete_refund_tx
 	# send the escrow to seller, proving we have money on the table
 	send_escrow_tx_to_seller(escrow_tx)
 
 	# create a tab tx that sends seller bitcoin for services
 	tab_tx = create_tab_transaction(escrow_tx, seller_multisig_pub_key)
 
+	print 'Micropayment channel successfully created'
 	return tab_tx
 
 
@@ -138,7 +139,7 @@ def buyer_update_tab_transaction(tab_tx, delta):
 	serialized_tab_tx = serialize(tab_tx)
 	buyer_signature = multisign(serialized_tab_tx, 0, tab_tx['ins'][0]['script'], \
 								buyer_multisig_priv_key)
-	print 'updating tx', tab_tx
+	print 'updating tx', json.dumps(tab_tx, indent=4, separators=(',',': '))
 	return buyer_signature, tab_tx
 
 # create escrow transaction
@@ -154,8 +155,8 @@ def create_escrow_transaction(buyer_pub_key, buyer_priv_key, seller_pub_key):
 
 	# make a change address for the difference between inputs and outputs
 	change_pub_key, change_priv_key = get_new_pub_priv_key()
-	print 'change_pub_key:', change_pub_key
-	print 'change_priv_key:', change_priv_key
+#	print 'change_pub_key:', change_pub_key
+#	print 'change_priv_key:', change_priv_key
 	change_addr       		 = pubkey_to_address(change_pub_key)
 	change_output			 = {}
 	change_output['address'] = change_addr
@@ -185,7 +186,7 @@ def create_refund_transaction(escrow_tx):
 	multisig_input['outpoint']['hash'] = txhash(serialize(escrow_tx))
 	multisig_input['sequence'] = 0
 
-	print "I AM A GOOSE", multisig_input, "\nI AM ANOTHER GOOSE", refund_output
+#	print "I AM A GOOSE", multisig_input, "\nI AM ANOTHER GOOSE", refund_output
 
 	return build_refund_transaction([multisig_input], [refund_output])
 
@@ -294,11 +295,11 @@ def seller_validate_escrow_tx(escrow_tx):
 
 def send_refund_for_signature(peer, refund_tx):
 	socket.send_json(refund_tx)
-	print 'sent refund_tx for signature'
+#	print 'sent refund_tx for signature'
 
 	# seller sends from seller_handle_refund_transaction
 	signature = socket.recv_string()
-	print 'received signature' , signature
+#	print 'received signature' , signature
 	
 	#TODO: check signature
 
@@ -320,9 +321,9 @@ def request_pub_key_from_peer(peer):
 	message = {}
 	message['intent'] = 'buy'
 	socket.send_json(message)
-	print 'Sent my good lord a message' , str(message)
+#	print 'Sent my good lord a message' , str(message)
 	msg = socket.recv()
-	print 'received pub key', msg
+#	print 'received pub key', msg
 	return msg
 	#socket.connect("tcp://localhost:%s" % port)
 
@@ -331,7 +332,7 @@ def seller_handle_refund_tx():
 	# wait for the refund_tx from the buyer
 	# buyer sends from send_refund_for_signature
 	refund_tx = dict(socket.recv_json())
-	print 'received refund tx', refund_tx
+#	print 'received refund tx', refund_tx
 
 	# validate refund tx (check that input is multisig with our key)
 	# TODO
@@ -340,7 +341,7 @@ def seller_handle_refund_tx():
 	# to get a refund if seller disappears
 	signature = seller_sign_refund(refund_tx)
 	socket.send_string(signature)
-	print 'returned signature for refund', signature
+#	print 'returned signature for refund', signature
 
 def seller_handle_escrow_tx():
 
@@ -375,8 +376,8 @@ def seller_handle_updated_transaction():
 	updated_tx  = socket.recv()
 
 	# TODO: verify sig and tx
-	print 'updated_sig', updated_sig
-	print 'updated_tx',  updated_tx
+#	print 'updated_sig', updated_sig
+#	print 'updated_tx',  updated_tx
 
 	return updated_tx
 
@@ -386,9 +387,9 @@ def buyer_send_domain_request(domain):
 	return socket.recv()
 
 def buy_data(peer):
-	print 'buy_data(%s)' % str(peer)
+#	print 'buy_data(%s)' % str(peer)
 	tab_tx = buyer_open_micropayment_channel_with_peer(peer)
-
+	print 'Micropayment channel successfully created'
 	while True:
 		domain = raw_input('Request URL:')
 		print buyer_send_domain_request(domain)
@@ -404,7 +405,7 @@ def listen_for_buyers():
 
 			# listen for messages
 			message = socket.recv_json()
-			print 'received message', message	
+#			print 'received message', message	
 			parse_message(message)
 		except Exception as e:
 			pass
@@ -417,7 +418,7 @@ def parse_message(peer_message):
 	peer_message = dict(peer_message)
 	print peer_message['intent']
 	if peer_message['intent'] == 'buy':
-		print 'intent is to buy'
+#		print 'intent is to buy'
 		send_pub_key_to_peer()
 		seller_handle_refund_tx()
 		seller_handle_escrow_tx()
@@ -432,7 +433,7 @@ def send_pub_key_to_peer():
 	global seller_multisig_priv_key
 	pub, seller_multisig_priv_key = get_new_pub_priv_key()
 	socket.send(pub)
-	print 'sent', pub, 'waiting for refund tx'
+#	print 'sent', pub, 'waiting for refund tx'
 
 
 
