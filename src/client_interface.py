@@ -53,11 +53,11 @@ class ClientWindow(Frame):
 	# on connect_button left clicked
 	def connect_callback(self,event):
 		self.log_text_area.config(state=NORMAL)
-		self.log_text_area.insert(END,"\nConnecting to: "+"IP/"+":"+"PORT")
+		self.log_text_area.insert(END,"\nConnecting.\n")
 		self.log_text_area.config(state=DISABLED)
 		print 'BUTTON CLICKED YO'
 		try:
-			bitmesh.buy_data("192.168.43.73")
+			bitmesh.buy_data("192.168.43.73", self)
 		except:
 			print "There was an issue."
 			traceback.print_exc()
@@ -75,6 +75,15 @@ class ClientWindow(Frame):
 		x = (sw - self.w)/2
 		y = (sh - self.h)/2
 		self.parent.geometry('%dx%d+%d+%d' % (self.w, self.h, x, y))
+
+	def get_site():
+		return self.myText_Box.get("1.0",END)
+
+	def update_log(self,log_entry):
+		self.log_text_area.config(state=NORMAL)
+		self.log_text_area.insert(END,"\n\n"+log_entry)
+		self.log_text_area.config(state=DISABLED)
+    	pass
 
 # start up the client GUI
 def start_client():

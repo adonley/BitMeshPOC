@@ -119,14 +119,17 @@ def buyer_open_micropayment_channel_with_peer(peer):
 	# create a tab tx that sends seller bitcoin for services
 	tab_tx = create_tab_transaction(escrow_tx, seller_multisig_pub_key)
 
-	return tab_tx
+	return deserialize(tab_tx)
 
 
 # updates tab transaction by delta and re-signs the transaction
 # returns the signature and the updated tab_tx
 def buyer_update_tab_transaction(tab_tx, delta):
-	refund_output   = tab_tx['outputs'][0]
-	purchase_output = tab_tx['outputs'][1]
+	print "MY NAME IS TABBED TRANSITORY ACTIONS", tab_tx
+	tab_tx = dict(tab_tx)
+
+	refund_output   = tab_tx['outs'][0]
+	purchase_output = tab_tx['outs'][1]
 
 	if refund_output['value'] < delta:
 		print 'not enough funds available'
@@ -391,10 +394,10 @@ def buy_data(peer):
 
 	while True:
 		domain = raw_input('Request URL:')
-		print buyer_send_domain_request(domain)
+		site = buyer_send_domain_request(domain)
 		updated_sig, tab_tx = buyer_update_tab_transaction(tab_tx, 100)
 		socket.send_string(updated_sig)
-		socket.send_string(tab_tx)
+		socket.send_json(tab_tx)
 
 
 def listen_for_buyers():
