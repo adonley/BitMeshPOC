@@ -24,6 +24,8 @@ from bitcoin.main import *
 from bitcoin.transaction import *
 import zmq
 import requests
+import webbrowser
+import os
 
 # channel_width determines how many bytes pass thru before Alice pays
 # should be a multiple of MTU? change units to packets?
@@ -120,14 +122,17 @@ def buyer_open_micropayment_channel_with_peer(peer):
 	tab_tx = create_tab_transaction(escrow_tx, seller_multisig_pub_key)
 
 	print 'Micropayment channel successfully created'
-	return tab_tx
+	return deserialize(tab_tx)
 
 
 # updates tab transaction by delta and re-signs the transaction
 # returns the signature and the updated tab_tx
 def buyer_update_tab_transaction(tab_tx, delta):
-	refund_output   = tab_tx['outputs'][0]
-	purchase_output = tab_tx['outputs'][1]
+#	print "MY NAME IS TABBED TRANSITORY ACTIONS", tab_tx
+	tab_tx = dict(tab_tx)
+
+	refund_output   = tab_tx['outs'][0]
+	purchase_output = tab_tx['outs'][1]
 
 	if refund_output['value'] < delta:
 		print 'not enough funds available'
@@ -358,7 +363,7 @@ def seller_handle_escrow_tx():
 		print 'escrow_tx was not valid', escrow_tx
 		# TODO 
 
-	socket.send('escrow tx was %s' % valid)
+	#socket.send('escrow tx was %s' % valid)
 
 def seller_handle_domain_request():
 
@@ -384,7 +389,7 @@ def seller_handle_updated_transaction():
 
 def buyer_send_domain_request(domain):
 	socket.send_string(domain)
-	return socket.recv()
+	return socket.recv_string()
 
 def buy_data(peer):
 #	print 'buy_data(%s)' % str(peer)
@@ -392,10 +397,17 @@ def buy_data(peer):
 	print 'Micropayment channel successfully created'
 	while True:
 		domain = raw_input('Request URL:')
-		print buyer_send_domain_request(domain)
+		site = buyer_send_domain_request(domain)
+		print site
+
+		with open("site.html","wb") as f:
+			f.write(site.encode('utf-8'))
+		webbrowser.open('file://%s' % os.path.abspath('site.html'))
+
+
 		updated_sig, tab_tx = buyer_update_tab_transaction(tab_tx, 100)
 		socket.send_string(updated_sig)
-		socket.send_string(tab_tx)
+		socket.send_json(tab_tx)
 
 
 def listen_for_buyers():
