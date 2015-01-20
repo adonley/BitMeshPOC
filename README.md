@@ -1,5 +1,3 @@
+BitMesh is an organization that is developing around the latest innovations in consumer electronics, networking technology and payment mechanisms to build an open source platform that will revolutionize the way you share the internet across the globe.
 
-TODOS:
-	- Work out bartering protocol
-	- Figure out exactly how much of a bitcoin node we need
-	- Construct example implementing the protocol (Mycelium?)
+Currently there is a proof of concept implemented in Python. This demonstrates a client requesting a webpage from a server, negotiating a price and ultimately receiving the requested webpage. The next iteration will include porting this code to C/C++ or an equivalent compiled language for easy migration to new platforms and extending the functionality.
